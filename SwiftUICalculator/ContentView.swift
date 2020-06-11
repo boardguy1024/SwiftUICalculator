@@ -8,20 +8,60 @@
 
 import SwiftUI
 
-struct Animal: Identifiable {
-    var id = UUID()
-    var name: String
+enum CalculatorButton: String {
+    case zero, one, two, three, four, five, six, seven, eight, nine, dot
+    case equals, plus, minus, multiply, divide
+    case ac, pulsMinus, percent
+    
+    var title: String {
+        switch self {
+        case .zero: return "0"
+        case .one: return "1"
+        case .two: return "2"
+        case .three: return "3"
+        case .four: return "4"
+        case .five: return "5"
+        case .six: return "6"
+        case .seven: return "7"
+        case .eight: return "8"
+        case .nine: return "9"
+            
+        case .percent: return "%"
+        case .minus: return "-"
+        case .plus: return "+"
+        case .pulsMinus: return "±"
+        case .multiply: return "X"
+        case .equals: return "="
+        case .dot: return "."
+            
+        default:
+            return "AC"
+            
+        }
+    }
+    var backgroundColor: Color {
+        switch self {
+        case .zero, .one, .two, .three, .four, .five, .six, .seven, .eight, .nine, .dot:
+            return Color(.darkGray)
+        case .ac, .pulsMinus, .percent:
+            return Color(.lightGray)
+        default:
+            return Color(.orange)
+        }
+    }
 }
 struct ContentView: View {
 
    
 
-    let buttons = [
-        ["7","8","9","X"],
-        ["4","5","6","-"],
-        ["1","2","3","+"],
-        ["0",".",".","="],
+    let buttons: [[CalculatorButton]] = [
+        [.ac, .pulsMinus, .percent, .divide],
+        [.seven, .eight, .nine, .minus],
+        [.four, .five, .six, .minus],
+        [.one, .two, .three, .plus],
+        [.zero, .dot, .equals]
     ]
+    
     var body: some View {
         
         ZStack (alignment: .bottom) {
@@ -38,12 +78,19 @@ struct ContentView: View {
                 ForEach(buttons, id: \.self) { row in
                     HStack (spacing: 12) {
                         ForEach(row, id: \.self) { button in
-                            Text(button)
+                            
+                            Button(action: {
+                                print("tapped")
+                            }) {
+                                Text(button.title)
                                 .font(.system(size: 32))
-                                .frame(width: self.buttonWidth(), height: self.buttonWidth(), alignment: .center)
+                                .frame(width: self.buttonWidth(button: button), height: self.buttonHeight(), alignment: .center)
                                 .foregroundColor(.white)
-                                .background(Color.yellow)
-                                .cornerRadius(self.buttonWidth())
+                                .background(button.backgroundColor)
+                                .cornerRadius(self.buttonWidth(button: button))
+                            }
+                            
+                            
                         }
                     }
                 }
@@ -51,7 +98,15 @@ struct ContentView: View {
         }
     }
     
-    func buttonWidth() -> CGFloat {
+    func buttonHeight() -> CGFloat {
+        80
+    }
+    
+    func buttonWidth(button: CalculatorButton) -> CGFloat {
+        if button == .zero {
+            return (UIScreen.main.bounds.width - 3 * 12) / 4 * 2
+        }
+        // 5はボタン間のスペースの数　margin == 12 * spacing == 5
         return (UIScreen.main.bounds.width - 5 * 12) / 4
            }
 }
