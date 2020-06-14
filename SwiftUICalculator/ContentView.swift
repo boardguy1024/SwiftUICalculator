@@ -50,9 +50,22 @@ enum CalculatorButton: String {
         }
     }
 }
+
+// treat - 扱う
+// You can treat this as the Global Application State
+class GlobalEnvironment: ObservableObject {
+    
+    @Published var display = ""
+    
+    func receiveInput(calculatorButton: CalculatorButton) {
+        self.display = calculatorButton.title
+    }
+    
+}
+
 struct ContentView: View {
 
-   
+    @EnvironmentObject var env: GlobalEnvironment
 
     let buttons: [[CalculatorButton]] = [
         [.ac, .pulsMinus, .percent, .divide],
@@ -70,7 +83,7 @@ struct ContentView: View {
             VStack(spacing: 12) {
                 HStack {
                     Spacer()
-                    Text("42").foregroundColor(.white)
+                    Text(env.display).foregroundColor(.white)
                         .font(.system(size: 72))
                 }.padding()
                 
@@ -78,18 +91,7 @@ struct ContentView: View {
                 ForEach(buttons, id: \.self) { row in
                     HStack (spacing: 12) {
                         ForEach(row, id: \.self) { button in
-                            
-                            Button(action: {
-                                print("tapped")
-                            }) {
-                                Text(button.title)
-                                .font(.system(size: 32))
-                                .frame(width: self.buttonWidth(button: button), height: self.buttonHeight(), alignment: .center)
-                                .foregroundColor(.white)
-                                .background(button.backgroundColor)
-                                .cornerRadius(self.buttonWidth(button: button))
-                            }
-                            
+                            CalculatorButtonView(button: button)
                             
                         }
                     }
@@ -98,21 +100,43 @@ struct ContentView: View {
         }
     }
     
-    func buttonHeight() -> CGFloat {
-        80
+  
+}
+
+struct CalculatorButtonView: View {
+    
+    var button: CalculatorButton
+    @EnvironmentObject var env: GlobalEnvironment
+    
+    var body: some View {
+        
+        Button(action: {
+            self.env.receiveInput(calculatorButton: self.button)
+        }) {
+            Text(button.title)
+            .font(.system(size: 32))
+            .frame(width: self.buttonWidth(button: button), height: self.buttonHeight(), alignment: .center)
+            .foregroundColor(.white)
+            .background(button.backgroundColor)
+            .cornerRadius(self.buttonWidth(button: button))
+        }
     }
     
-    func buttonWidth(button: CalculatorButton) -> CGFloat {
-        if button == .zero {
-            return (UIScreen.main.bounds.width - 3 * 12) / 4 * 2
-        }
-        // 5はボタン間のスペースの数　margin == 12 * spacing == 5
-        return (UIScreen.main.bounds.width - 5 * 12) / 4
-           }
+    func buttonHeight() -> CGFloat {
+          80
+      }
+      
+      func buttonWidth(button: CalculatorButton) -> CGFloat {
+          if button == .zero {
+              return (UIScreen.main.bounds.width - 3 * 12) / 4 * 2
+          }
+          // 5はボタン間のスペースの数　margin == 12 * spacing == 5
+          return (UIScreen.main.bounds.width - 5 * 12) / 4
+             }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView().environmentObject(GlobalEnvironment())
     }
 }
